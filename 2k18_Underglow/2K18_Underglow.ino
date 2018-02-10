@@ -15,35 +15,30 @@
    COMMMANDS FOR SERIAL
    ALL VALUES ARE CHAR
 
-   B-COLORS ALL STRIPS BLUE
-   E-CREATES A RANDOM BLUE PATTERN - LIKE FIRE
-   F-CREATES A RANDOM RED PATTERN  - LIKE FIRE
-   I-INITIALIZES ALL STRIPS TO BLUE WITH A FADE
-   J-INITIALIZES ALL STRIPS TO BLUE WITH A LONGER FADE
-   K-INITIALIZES ALL STRIPS TO WHITE WITH A FADE
-   L-INITIALIZES ALL STRIPS TO WHITE WITH A LONGER FADE
-   M-COLORS ALL STRIPS RED
-   N-TURNS ALL STRIPS OFF
-   O-CREATES A HEARTBEAT IN BLUE LIGHT - INFINITE BUT CAN BE INTERRUPTED BY NEW SERIAL DATA
-   P-CREATES A SINGLE HEARTBEAT IN BLUE LIGHT
-   Q-FADES ALL STRIPS TO BE OFF
-   R-A PRETTY, INTERRUPTABLE RAINBOW!
-   W-COLORS ALL STRIPS WHITE
-   Y-RUNS NON-INTERRUPTABLE DEFAULT-DESIGN METHOD 3
-   Z-RUNS NON-INTERRUPTABLE DEFAULT-DESIGN METHOD 2
+   B-Blue
+   C-Red
+   D-Blue Delayed
+   E-Red Delayed
+   F-Off
+   G-Fade to off
+   P-Blue Bounce
+   Q-Red Bounce
+   W-White (dont use plos)
+   Z-Rainbow Everywhere!
+
 */
 
 #include <Adafruit_NeoPixel.h>
 
 //pinouts for lanes
-#define LANE_ONE     3
-#define LANE_TWO     5
-#define LANE_THREE   6
+#define LANE_ONE     5
+#define LANE_TWO     6
+#define LANE_THREE   3
 
 #define PIXEL_COUNT        30 //for temp obj
 
 #define PIXEL_COUNT_ONE    144
-#define PIXEL_COUNT_TWO    3
+#define PIXEL_COUNT_TWO    144
 #define PIXEL_COUNT_THREE  3
 
 #define PIXEL_BRIGHTNESS   255 //0-255
@@ -62,8 +57,8 @@ void setup() {
 }
 
 void loop() {
-  // Disable code - Takes a time interval and then shuts off the leds if there hasnt been a cereal bowl poured in the last couple of minutes
-  /*
+    // Disable code - Takes a time interval and then shuts off the leds if there hasnt been a cereal bowl poured in the last couple of minutes
+    /*
     static int timeSince;
     if (millis() + (1000 * 60) <= timeSince)
     {
@@ -72,7 +67,7 @@ void loop() {
     */
   if (runDefault) {
     Serial.println("Running default code");
-    defaultDesignComp();
+    defaultDesign();
   }
   else if (Serial.available() > 0) {
     //timeSince = millis();
@@ -85,63 +80,70 @@ void interpret(char x) {
   switch (x) {
     case 'B':
       ColorAll(Lane1.Color(0, 0, PIXEL_BRIGHTNESS));
-      Serial.println("Painting the strips Phthalo Blue");
+      Serial.println("blue");
       break;
-    case 'E':
-      straightBlueFire();
-      Serial.println("Painting blue!");
+    case 'C':
+      ColorAll(Lane1.Color(PIXEL_BRIGHTNESS, 0, 0));
+      Serial.println("red");
       break;
-    case 'F':
-      straightActualFire();
-      Serial.println("Painting red!");
-      break;
-    case 'I':
+    case 'D':
       initToColorFade(Lane1.Color(0, 0, PIXEL_BRIGHTNESS), 10);
       Serial.println("Initializing to blue");
       break;
-    case 'J':
-      initToColorFade(Lane1.Color(0, 0, PIXEL_BRIGHTNESS), 100);
-      Serial.println("Initializing to blue with a longer delay");
+    case 'E':
+      initToColorFade(Lane1.Color(PIXEL_BRIGHTNESS, 0, 0), 10);
+      Serial.println("Initializing to red");
       break;
-    case 'K':
-      initToColorFade(Lane1.Color(PIXEL_BRIGHTNESS, PIXEL_BRIGHTNESS, PIXEL_BRIGHTNESS), 10);
-      Serial.println("Initializing to white");
-      break;
-    case 'L':
-      initToColorFade(Lane1.Color(PIXEL_BRIGHTNESS, PIXEL_BRIGHTNESS, PIXEL_BRIGHTNESS), 100);
-      Serial.println("Initializing to white with a long delay");
-      break;
-    case 'M':
-      ColorAll(Lane1.Color(PIXEL_BRIGHTNESS, 0, 0));
-      Serial.println("turning strips red");
-      break;
-    case 'N':
+    case 'F':
       ColorAll(Lane1.Color(0, 0, 0));
-      Serial.println("turning strips off");
+      Serial.println("off");
       break;
-    case 'Q':
-      initToColorFade(Lane1.Color(0, 0, 0), 100);
+    case 'G':
+      initToColorFade(Lane1.Color(0, 0, 0), 10);
       Serial.println("painting it black");
       break;
-    case 'R':
-      Serial.println("Painting a pretty rainbow");
-      for (int x = 0;  x < 255; x++) {
-        ColorAllWithWait(Wheel(x), 5);
-        if (Serial.available() > 0)
+    case 'P':
+      for (int x = 0; x < 255; x++){
+          if (Serial.available() > 0){
           break;
+          }
+        ColorAll(Lane1.Color(0, 0, x));
+      }
+      delay(0.01);
+      for (int y = 255; y > 0; y--){
+          if (Serial.available() > 0){
+          break;
+          }
+        ColorAll(Lane1.Color(0, 0, y));
+      }
+      break;
+    case 'Q':
+      for (int x = 0; x < 255; x++){
+          if (Serial.available() > 0){
+          break;
+          }
+        ColorAll(Lane1.Color(x, 0, 0));
+      }
+      delay(0.01);
+      for (int y = 255; y > 0; y--){
+          if (Serial.available() > 0){
+          break;
+          }
+        ColorAll(Lane1.Color(y, 0, 0));
       }
       break;
     case 'W':
       ColorAll(Lane1.Color(PIXEL_BRIGHTNESS, PIXEL_BRIGHTNESS, PIXEL_BRIGHTNESS)); // PLEASE BE CAREFUL, THIS WILL DRAW A LOT OF POWER!
       Serial.println("Painting the strips white");
       break;
-    case 'X':
-      initToColorFade(Lane1.Color(PIXEL_BRIGHTNESS, 0, 0), 10);
-      Serial.println("Initializing to red");
-      break;
     case 'Z':
-      defaultDesignComp();
-      Serial.println("Running the default code v2");
+      Serial.println("Painting a pretty rainbow");
+      for (int x = 0;  x < 255; x++) {
+          if (Serial.available() > 0){
+          break;
+          }
+        ColorAllWithWait(Wheel(x), 5);
+      }
       break;
   }
 }
@@ -214,45 +216,21 @@ void laneThreeColorWipe(uint32_t c, uint8_t wait) { // C is color, wait is, well
   }
 }
 
-void defaultDesignFun() {
-  interpret('J'); // long init blue
+void defaultDesign() {
+  interpret('D'); // long init blue
   delay(10);
-  interpret('L'); // long init white
+  interpret('E');
   delay(10);
-  interpret('I'); // init blue
-  delay(100);
-  interpret('K'); // init white
-  delay(100);
-  interpret('N'); // init to black
-  delay(100);
-  interpret('X'); // init to red for rainbow
-  delay(100);
-  interpret('R'); // rainbow
-  interpret('R'); // rainbow
-  delay(100);
-  interpret('I'); // init blue
-  delay(500);
-
   interpret('P');
-  interpret('P');
-  interpret('P');
-
-  interpret('P');
-  interpret('P');
-  interpret('P');
-
-  interpret('I'); // init blue
-  delay(500);
-  interpret('B'); // paint blue
-  delay(500);
-  interpret('E'); // blue fire
-  interpret('N'); // init to black
-  delay(250);
-}
-
-void defaultDesignComp() {
-  interpret('R'); // single pulse P or rainbow with pulse S
-  // delay(5000);
+  delay(10);
+  interpret('Q');
+  delay(10);
+  interpret('G');
+  delay(10);
+  interpret('Z');
+  delay(10);
+  interpret('G');
+  delay(10);
 }
 
 void straightBlueFire()
@@ -277,8 +255,8 @@ void straightBlueFire()
 }
 
 void straightActualFire()
-{
   //3 Second burst
+{
   for (int iter = 0; iter <= 30; iter++)
   {
     for (int x = 0; x < Lane1.numPixels(); x++)
@@ -300,16 +278,6 @@ void straightActualFire()
   }
 }
 
-// NEEDS TESTING NEEDS TESTING NEEDS TESTING NEEDS TESTING NEEDS TESTING
-void blueLightPulseAll(int wait)
-{
-  for (int x = 0; x < 255; x++)
-    ColorAll(Lane1.Color(0, 0, x));
-  delay(wait);
-  for (int y = 255; y > 0; y--)
-    ColorAll(Lane1.Color(0, 0, y));
-}
-
 int regulate(int x)
 {
   if (x >= 0 && x <= 255)
@@ -319,18 +287,6 @@ int regulate(int x)
   else if (x < 0)
     return regulate(x + 255);
   return x;
-}
-
-void colorDeep()
-{
-  ColorAll(Lane1.Color(0, 0, 255));
-  delay(100);
-  ColorAll(Lane1.Color(0, 255, 0));
-  delay(100);
-  ColorAll(Lane1.Color(255, 0, 0));
-  delay(100);
-  ColorAll(Lane1.Color(0, 0, 0));
-  delay(100);
 }
 
 // Input a value 0 to 255 to get a color value.
