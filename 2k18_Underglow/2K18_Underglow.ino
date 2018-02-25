@@ -39,10 +39,10 @@
 
 #define PIXEL_COUNT        30 //for temp obj
 
-#define PIXEL_COUNT_ONE    40
-#define PIXEL_COUNT_TWO    40
-#define PIXEL_COUNT_THREE  40
-#define PIXEL_COUNT_FOUR   40
+#define PIXEL_COUNT_ONE    45
+#define PIXEL_COUNT_TWO    45
+#define PIXEL_COUNT_THREE  45
+#define PIXEL_COUNT_FOUR   45
 
 #define PIXEL_BRIGHTNESS   255 //0-255
 
@@ -74,7 +74,7 @@ void loop() {
     Serial.println("Running default code");
     defaultDesign();
   }
-  else if (Serial.available() > 0) {
+  else if ((Serial.available() > 0) && !runDefault) {
     //timeSince = millis();
     interpret(Serial.read());
     Serial.println("Interpreting");
@@ -252,20 +252,12 @@ void laneFourColorWipe(uint32_t c, uint8_t wait) { // C is color, wait is, well,
 }
 
 void defaultDesign() {
-  interpret('D'); // long init blue
-  delay(10);
-  interpret('E');
-  delay(10);
-  interpret('P');
-  delay(10);
-  interpret('Q');
-  delay(10);
-  interpret('G');
-  delay(10);
-  interpret('Z');
-  delay(10);
-  interpret('G');
-  delay(10);
+      PosX = 0;
+      for(int i=0; i < Lane4.numPixels() * 2; i++){
+        PosX++;
+        BlueRunningLightsAll(PosX);
+        delay(10);
+      }
 }
 
 void BlueRunningLightsAll(int Position) {
