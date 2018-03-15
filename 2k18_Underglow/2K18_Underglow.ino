@@ -23,9 +23,14 @@
    G-Fade to off
    P-Blue Bounce
    Q-Red Bounce
+   R-Rainbow Everywhere!
+   T-Fancy Magenta Things
+   U-Fancy Yellow Things
+   V-Fancy Cyan Things
    W-White (dont use plos)
-   X-Fancy Blue Laser Things
-   Z-Rainbow Everywhere!
+   X-Fancy Red Laser Things
+   Y-Fancy Blue Laser Things
+   Z-Fancy Green Laser Things
 
 */
 
@@ -53,6 +58,8 @@ Adafruit_NeoPixel Lane4 = Adafruit_NeoPixel(PIXEL_COUNT_FOUR, LANE_FOUR, NEO_GRB
 
 bool runDefault = false;
 int PosX = 0;
+int rainX = 0;
+double interval = 7.1775;
 
 void setup() {
   Serial.begin(9600);
@@ -83,31 +90,37 @@ void loop() {
 
 void interpret(char x) {
   switch (x) {
-    case 'B':
+    case 'B': {
       ColorAll(Lane1.Color(0, 0, PIXEL_BRIGHTNESS));
       Serial.println("blue");
       break;
-    case 'C':
+    }
+    case 'C': {
       ColorAll(Lane1.Color(PIXEL_BRIGHTNESS, 0, 0));
       Serial.println("red");
-      break;
-    case 'D':
+      break; 
+    }
+    case 'D':{
       initToColorFade(Lane1.Color(0, 0, PIXEL_BRIGHTNESS), 10);
       Serial.println("Initializing to blue");
       break;
-    case 'E':
+  }
+    case 'E':{
       initToColorFade(Lane1.Color(PIXEL_BRIGHTNESS, 0, 0), 10);
       Serial.println("Initializing to red");
       break;
-    case 'F':
+    }
+    case 'F':{
       ColorAll(Lane1.Color(0, 0, 0));
       Serial.println("off");
       break;
-    case 'G':
+    }
+    case 'G':{
       initToColorFade(Lane1.Color(0, 0, 0), 10);
       Serial.println("painting it black");
       break;
-    case 'P':
+    }
+    case 'P':{
       for (int x = 0; x < 64; x++){
           if (Serial.available() > 0){
           break;
@@ -122,7 +135,8 @@ void interpret(char x) {
         ColorAll(Lane1.Color(0, 0, y * 4));
       }
       break;
-    case 'Q':
+    }
+    case 'Q':{
       for (int x = 0; x < 64; x++){
           if (Serial.available() > 0){
           break;
@@ -137,30 +151,84 @@ void interpret(char x) {
         ColorAll(Lane1.Color(y * 4, 0, 0));
       }
       break;
-    case 'W':
+    }
+    case 'R':{
+      rainX = 0;
+      Serial.println("Painting a pretty rainbow");
+      while(!(Serial.available() > 0)){
+        ColorAllWithWait(Wheel(rainX), 0.5);
+        if (rainX > 255){
+          rainX = 0;
+        } else {
+          rainX++;
+        }
+      }
+      break;
+    }
+    case 'T':{
+      PosX = 0;
+      while(!(Serial.available() > 0)){
+        PosX++;
+        MagentaRunningLightsAll(PosX);
+        delay(15);
+      }
+      break;
+    }
+    case 'U':{
+      PosX = 0;
+      while(!(Serial.available() > 0)){
+        PosX++;
+        YellowRunningLightsAll(PosX);
+        delay(15);
+      }
+      break;
+    }
+    case 'V':{
+      PosX = 0;
+      while(!(Serial.available() > 0)){
+        PosX++;
+        CyanRunningLightsAll(PosX);
+        delay(15);
+      }
+      break;
+    }
+    case 'W':{
       ColorAll(Lane1.Color(PIXEL_BRIGHTNESS, PIXEL_BRIGHTNESS, PIXEL_BRIGHTNESS)); // PLEASE BE CAREFUL, THIS WILL DRAW A LOT OF POWER!
       Serial.println("Painting the strips white");
       break;
-    case 'X':
+    }
+    case 'X':{
       PosX = 0;
-      for(int i=0; i < Lane4.numPixels() * 2; i++){
+      while(!(Serial.available() > 0)){
         PosX++;
-        BlueRunningLightsAll(PosX);
-          if (Serial.available() > 0){
-          break;
-          }
-        // delay(10);
-      }
-
-    case 'Z':
-      Serial.println("Painting a pretty rainbow");
-      for (int x = 0;  x < 255; x++) {
-          if (Serial.available() > 0){
-          break;
-          }
-        ColorAllWithWait(Wheel(x), 5);
+        RedRunningLightsAll(PosX);
+        delay(15);
       }
       break;
+    }
+    case 'Y':{
+      PosX = 0;
+      while(!(Serial.available() > 0)){
+        PosX++;
+        BlueRunningLightsAll(PosX);
+        delay(15);
+      }
+      break;
+    }
+    case 'Z':{
+      PosX = 0;
+      while(!(Serial.available() > 0)){
+        PosX++;
+        GreenRunningLightsAll(PosX);
+        delay(15);
+      }
+      break;
+    }
+    default:{
+      initToColorFade(Lane1.Color(0, 0, 0), 10);
+      Serial.println("painting it black");
+      break;
+    }
   }
 }
 
@@ -253,19 +321,93 @@ void laneFourColorWipe(uint32_t c, uint8_t wait) { // C is color, wait is, well,
 
 void defaultDesign() {
       PosX = 0;
-      for(int i=0; i < Lane4.numPixels() * 2; i++){
+      for(int i=0; i < Lane4.numPixels() * 5; i++){
         PosX++;
         BlueRunningLightsAll(PosX);
         delay(10);
       }
 }
 
-void BlueRunningLightsAll(int Position) {
+void RedRunningLightsAll(int position) {
       for(int i=0; i<Lane4.numPixels(); i++) {
-        Lane1.setPixelColor(i,Lane1.Color(((sin(i+Position) * 127 + 128)/255), 0, 0));
-        Lane2.setPixelColor(i,Lane1.Color(((sin(i+Position) * 127 + 128)/255), 0, 0));
-        Lane3.setPixelColor(i,Lane1.Color(((sin(i+Position) * 127 + 128)/255), 0, 0));
-        Lane4.setPixelColor(i,Lane1.Color(((sin(i+Position) * 127 + 128)/255), 0, 0));
+        int color = ((sin((i+position)/(interval))*128)+128);
+        Lane1.setPixelColor(i,Lane1.Color(color, 0, 0));
+        Lane2.setPixelColor(i,Lane1.Color(color, 0, 0));
+        Lane3.setPixelColor(i,Lane1.Color(color, 0, 0));
+        Lane4.setPixelColor(i,Lane1.Color(color, 0, 0));
+      }
+      Lane1.show();
+      Lane2.show();
+      Lane3.show();
+      Lane4.show();
+}
+
+void BlueRunningLightsAll(int position) {
+      for(int i=0; i<Lane4.numPixels(); i++) {
+        int color = ((sin((i+position)/(interval))*128)+128);
+        Lane1.setPixelColor(i,Lane1.Color(0,0,color));
+        Lane2.setPixelColor(i,Lane1.Color(0,0,color));
+        Lane3.setPixelColor(i,Lane1.Color(0,0,color));
+        Lane4.setPixelColor(i,Lane1.Color(0,0,color));
+      }
+      Lane1.show();
+      Lane2.show();
+      Lane3.show();
+      Lane4.show();
+}
+
+void GreenRunningLightsAll(int position) {
+      for(int i=0; i<Lane4.numPixels(); i++) {
+        int color = ((sin((i+position)/(interval))*128)+128);
+        Lane1.setPixelColor(i,Lane1.Color(0,color,0));
+        Lane2.setPixelColor(i,Lane1.Color(0,color,0));
+        Lane3.setPixelColor(i,Lane1.Color(0,color,0));
+        Lane4.setPixelColor(i,Lane1.Color(0,color,0));
+      }
+      Lane1.show();
+      Lane2.show();
+      Lane3.show();
+      Lane4.show();
+}
+
+void MagentaRunningLightsAll(int position) {
+      for(int i=0; i<Lane4.numPixels(); i++) {
+        int color1 = ((sin(((i + (Lane4.numPixels()/2))+position)/(interval))*128)+128);
+        int color2 = ((sin((i+position)/(interval))*128)+128);
+        Lane1.setPixelColor(i,Lane1.Color(color1,0,color2));
+        Lane2.setPixelColor(i,Lane1.Color(color1,0,color2));
+        Lane3.setPixelColor(i,Lane1.Color(color1,0,color2));
+        Lane4.setPixelColor(i,Lane1.Color(color1,0,color2));
+      }
+      Lane1.show();
+      Lane2.show();
+      Lane3.show();
+      Lane4.show();
+}
+
+void YellowRunningLightsAll(int position) {
+      for(int i=0; i<Lane4.numPixels(); i++) {
+        int color1 = ((sin(((i + (Lane4.numPixels()/2))+position)/(interval))*128)+128);
+        int color2 = ((sin((i+position)/(interval))*128)+128);
+        Lane1.setPixelColor(i,Lane1.Color(color1,color2,0));
+        Lane2.setPixelColor(i,Lane1.Color(color1,color2,0));
+        Lane3.setPixelColor(i,Lane1.Color(color1,color2,0));
+        Lane4.setPixelColor(i,Lane1.Color(color1,color2,0));
+      }
+      Lane1.show();
+      Lane2.show();
+      Lane3.show();
+      Lane4.show();
+}
+
+void CyanRunningLightsAll(int position) {
+      for(int i=0; i<Lane4.numPixels(); i++) {
+        int color1 = ((sin(((i + (Lane4.numPixels()/2))+position)/(interval))*128)+128);
+        int color2 = ((sin((i+position)/(interval))*128)+128);
+        Lane1.setPixelColor(i,Lane1.Color(0,color1,color2));
+        Lane2.setPixelColor(i,Lane1.Color(0,color1,color2));
+        Lane3.setPixelColor(i,Lane1.Color(0,color1,color2));
+        Lane4.setPixelColor(i,Lane1.Color(0,color1,color2));
       }
       Lane1.show();
       Lane2.show();
